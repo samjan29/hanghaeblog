@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +28,8 @@ public class BlogService {
     }
 
     @Transactional(readOnly = true)
-    public Post getPost(Long id) {
-        return blogRepository.getReferenceById(id);
+    public Optional<Post> getPost(Long id) {
+        return blogRepository.findById(id);
     }
 
     @Transactional
@@ -36,6 +37,7 @@ public class BlogService {
         Post post = blogRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
         );
+        post.update(requestDto);
         return post.getId();
     }
 

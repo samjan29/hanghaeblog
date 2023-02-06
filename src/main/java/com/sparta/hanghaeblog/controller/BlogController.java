@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class BlogController {
     }
 
     @GetMapping("/api/post/{id}")
-    public Post getPost(@PathVariable Long id) {
+    public Optional<Post> getPost(@PathVariable Long id) {
         return blogService.getPost(id);
     }
 
