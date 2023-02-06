@@ -29,10 +29,13 @@ public class Post extends Timestamped {
     public Post(BlogRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();
+        this.author = requestDto.getAuthor();
+        this.password = requestDto.getPassword();
     }
 
     public void update(BlogRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();
+        this.author = requestDto.getAuthor();
     }
 }

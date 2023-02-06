@@ -34,7 +34,7 @@ public class BlogController {
     }
 
     @DeleteMapping("/api/post/{id}")
-    public Long deletePost(@PathVariable Long id, @RequestBody String password) {
-        return blogService.deletePost(id, password);
+    public Long deletePost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+        return blogService.deletePost(id, requestDto.getPassword());
     }
 }
