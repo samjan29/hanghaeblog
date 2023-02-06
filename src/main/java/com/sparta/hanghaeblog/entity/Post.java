@@ -20,6 +20,12 @@ public class Post extends Timestamped {
     @Column(nullable = false)
     private String contents;
 
+    @Column(nullable = false)
+    private String author;
+
+    @Column(nullable = false)
+    private String password;
+
     public Post(BlogRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();

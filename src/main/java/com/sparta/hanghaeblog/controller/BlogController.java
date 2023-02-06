@@ -1,13 +1,12 @@
 package com.sparta.hanghaeblog.controller;
 
 import com.sparta.hanghaeblog.dto.BlogRequestDto;
-import com.sparta.hanghaeblog.entity.Post;
+import com.sparta.hanghaeblog.dto.BlogResponseDto;
 import com.sparta.hanghaeblog.service.BlogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,17 +14,17 @@ public class BlogController {
     private final BlogService blogService;
 
     @GetMapping("/api/posts")
-    public List<Post> getPosts() {
+    public List<BlogResponseDto> getPosts() {
         return blogService.getPosts();
     }
 
     @PostMapping("/api/post")
-    public Post createPost(@RequestBody BlogRequestDto requestDto) {
+    public BlogResponseDto createPost(@RequestBody BlogRequestDto requestDto) {
         return blogService.createPost(requestDto);
     }
 
     @GetMapping("/api/post/{id}")
-    public Optional<Post> getPost(@PathVariable Long id) {
+    public BlogResponseDto getPost(@PathVariable Long id) {
         return blogService.getPost(id);
     }
 
@@ -35,7 +34,7 @@ public class BlogController {
     }
 
     @DeleteMapping("/api/post/{id}")
-    public Long deletePost(@PathVariable Long id) {
-        return blogService.deletePost(id);
+    public Long deletePost(@PathVariable Long id, @RequestBody String password) {
+        return blogService.deletePost(id, password);
     }
 }

@@ -1,14 +1,15 @@
 package com.sparta.hanghaeblog.service;
 
 import com.sparta.hanghaeblog.dto.BlogRequestDto;
+import com.sparta.hanghaeblog.dto.BlogResponseDto;
 import com.sparta.hanghaeblog.entity.Post;
 import com.sparta.hanghaeblog.repository.BlogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,34 +17,58 @@ public class BlogService {
     private final BlogRepository blogRepository;
 
     @Transactional(readOnly = true)
-    public List<Post> getPosts() {
-        return blogRepository.findAllByOrderByModifiedAtDesc();
+    public List<BlogResponseDto> getPosts() {
+        List<Post> list = blogRepository.findAllByOrderByModifiedAtDesc();
+        List<BlogResponseDto> dtoList = new ArrayList<>();
+
+        for (Post post : list) {
+            dtoList.add(new BlogResponseDto(post));
+        }
+
+        return dtoList;
     }
 
     @Transactional
-    public Post createPost(BlogRequestDto requestDto) {
+    public BlogResponseDto createPost(BlogRequestDto requestDto) {
         Post post = new Post(requestDto);
         blogRepository.save(post);
-        return post;
+        return new BlogResponseDto(post);
     }
 
     @Transactional(readOnly = true)
-    public Optional<Post> getPost(Long id) {
-        return blogRepository.findById(id);
+    public BlogResponseDto getPost(Long id) {
+        Post post = blogRepository.findById(id).orElseThrow(
+                ()  -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
+        );
+
+        return new BlogResponseDto(post);
     }
 
     @Transactional
     public Long updatePost(Long id, BlogRequestDto requestDto) {
+        if (!validatePassword(id, requestDto.getPassword())) {
+            return -99L;
+        }
+
         Post post = blogRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
         );
+
         post.update(requestDto);
         return post.getId();
     }
 
     @Transactional
-    public Long deletePost(Long id) {
+    public Long deletePost(Long id, String password) {
+        if (!validatePassword(id, password)) {
+            return -99L;
+        }
+
         blogRepository.deleteById(id);
         return id;
+    }
+
+    private Boolean validatePassword(Long id, String password) {
+        return password.equals(blogRepository.getReferenceById(id).getPassword());
     }
 }
