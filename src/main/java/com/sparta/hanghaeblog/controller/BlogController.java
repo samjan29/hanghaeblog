@@ -29,9 +29,14 @@ public class BlogController {
     }
 
     @PutMapping("/api/post/{id}")
-    public Long updatePost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+    public Long updatePutPost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
         return blogService.updatePost(id, requestDto);
     }
+
+//    @PatchMapping("/api/post/{id}")
+//    public Long updatePatchPost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+//        return blogService.updatePost(id, requestDto);
+//    }
 
     @DeleteMapping("/api/post/{id}")
     public Long deletePost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {

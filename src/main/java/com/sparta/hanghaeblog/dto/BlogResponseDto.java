@@ -10,7 +10,6 @@ public class BlogResponseDto {
     private String author;
     private String createdAt;
 
-
     public BlogResponseDto(Post post) {
         this.title = post.getTitle();
         this.contents = post.getContents();
