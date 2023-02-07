@@ -46,13 +46,14 @@ public class BlogService {
 
     @Transactional
     public Long updatePost(Long id, BlogRequestDto requestDto) {
-        if (!validatePassword(id, requestDto.getPassword())) {
-            return -99L;
-        }
-
+        // 비밀번호 확인보다 id를 먼저 조회해야 한다 생각해서 위로 올렸다.
         Post post = blogRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
         );
+
+        if (!validatePassword(id, requestDto.getPassword())) {
+            return -99L;
+        }
 
         post.update(requestDto);
         return post.getId();
@@ -60,6 +61,11 @@ public class BlogService {
 
     @Transactional
     public Long deletePost(Long id, String password) {
+        // 비밀번호 확인보다 id를 먼저 조회해야 한다 생각해서 위로 올렸다.
+        blogRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
+        );
+
         if (!validatePassword(id, password)) {
             return -99L;
         }
