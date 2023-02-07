@@ -18,7 +18,7 @@ public class BlogService {
 
     @Transactional(readOnly = true)
     public List<BlogResponseDto> getPosts() {
-        List<Post> list = blogRepository.findAllByOrderByModifiedAtDesc();
+        List<Post> list = blogRepository.findAllByOrderByCreatedAtDesc();
         List<BlogResponseDto> dtoList = new ArrayList<>();
 
         for (Post post : list) {
