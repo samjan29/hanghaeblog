@@ -10,36 +10,37 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class BlogController {
     private final BlogService blogService;
 
-    @GetMapping("/api/posts")
+    @GetMapping("/posts")
     public List<BlogResponseDto> getPosts() {
         return blogService.getPosts();
     }
 
-    @PostMapping("/api/post")
-    public BlogResponseDto createPost(@RequestBody BlogRequestDto requestDto) {
+    @PostMapping("/post")
+    public String createPost(@RequestBody BlogRequestDto requestDto) {
         return blogService.createPost(requestDto);
     }
 
-    @GetMapping("/api/post/{id}")
-    public BlogResponseDto getPost(@PathVariable Long id) {
+    @GetMapping("/post")
+    public BlogResponseDto getPost(@RequestParam Long id) {
         return blogService.getPost(id);
     }
 
-    @PutMapping("/api/post/{id}")
-    public Long updatePutPost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+    @PutMapping("/post/{id}")
+    public String updatePutPost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
         return blogService.updatePost(id, requestDto);
     }
 
-//    @PatchMapping("/api/post/{id}")
+//    @PatchMapping("/post/{id}")
 //    public Long updatePatchPost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
 //        return blogService.updatePost(id, requestDto);
 //    }
 
-    @DeleteMapping("/api/post/{id}")
-    public Long deletePost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+    @DeleteMapping("/post/{id}")
+    public String deletePost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
         return blogService.deletePost(id, requestDto.getPassword());
     }
 }

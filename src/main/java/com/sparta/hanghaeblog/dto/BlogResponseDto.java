@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @Getter
 public class BlogResponseDto {
-    private String title;
-    private String contents;
-    private String author;
-    private String createdAt;
+    private final String title;
+    private final String contents;
+    private final String author;
+    private final String createdAt;
 
     public BlogResponseDto(Post post) {
         this.title = post.getTitle();
