@@ -12,26 +12,25 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
 public class BlogController {
     private final BlogService blogService;
 
-    @GetMapping("/posts")
+    @GetMapping("/api/posts")
     public BlogDto<?> getPosts() {
         return blogService.getPosts();
     }
 
-    @PostMapping("/post")
+    @PostMapping("/api/post")
     public BlogDto<BlogMessageDto> createPost(@RequestBody BlogRequestDto requestDto) {
         return blogService.createPost(requestDto);
     }
 
-    @GetMapping("/post")
+    @GetMapping("/api/post")
     public BlogDto<?> getPost(@RequestParam Long id) {
         return blogService.getPost(id);
     }
 
-    @PutMapping("/post/{id}")
+    @PutMapping("/api/post/{id}")
     public BlogDto<BlogMessageDto> updatePutPost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
         return blogService.updatePost(id, requestDto);
     }
@@ -41,7 +40,7 @@ public class BlogController {
 //        return blogService.updatePost(id, requestDto);
 //    }
 
-    @DeleteMapping("/post/{id}")
+    @DeleteMapping("/api/post/{id}")
     public BlogDto<BlogMessageDto> deletePost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
         return blogService.deletePost(id, requestDto.getPassword());
     }
