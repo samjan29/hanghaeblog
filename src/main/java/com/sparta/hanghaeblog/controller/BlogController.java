@@ -1,5 +1,7 @@
 package com.sparta.hanghaeblog.controller;
 
+import com.sparta.hanghaeblog.dto.BlogDto;
+import com.sparta.hanghaeblog.dto.BlogMessageDto;
 import com.sparta.hanghaeblog.dto.BlogRequestDto;
 import com.sparta.hanghaeblog.dto.BlogResponseDto;
 import com.sparta.hanghaeblog.service.BlogService;
@@ -15,22 +17,22 @@ public class BlogController {
     private final BlogService blogService;
 
     @GetMapping("/posts")
-    public List<BlogResponseDto> getPosts() {
+    public BlogDto<?> getPosts() {
         return blogService.getPosts();
     }
 
     @PostMapping("/post")
-    public String createPost(@RequestBody BlogRequestDto requestDto) {
+    public BlogDto<BlogMessageDto> createPost(@RequestBody BlogRequestDto requestDto) {
         return blogService.createPost(requestDto);
     }
 
     @GetMapping("/post")
-    public BlogResponseDto getPost(@RequestParam Long id) {
+    public BlogDto<?> getPost(@RequestParam Long id) {
         return blogService.getPost(id);
     }
 
     @PutMapping("/post/{id}")
-    public String updatePutPost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+    public BlogDto<BlogMessageDto> updatePutPost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
         return blogService.updatePost(id, requestDto);
     }
 
@@ -40,7 +42,7 @@ public class BlogController {
 //    }
 
     @DeleteMapping("/post/{id}")
-    public String deletePost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+    public BlogDto<BlogMessageDto> deletePost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
         return blogService.deletePost(id, requestDto.getPassword());
     }
 }
