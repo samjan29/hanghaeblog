@@ -6,3 +6,6 @@
 
 ### API 명세서
 ![Blog API 명세서](/etc/blogAPI.png)
+
+### ERD
+![Blog ERD](/etc/blogERD.png)
