@@ -50,7 +50,7 @@ public class BlogService {
     }
 
     @Transactional
-    public ApiUtils<ApiMessage> createPost(BlogDto.Request requestDto, HttpServletRequest request) {
+    public ApiUtils<?> createPost(BlogDto.Request requestDto, HttpServletRequest request) {
         // Request에서 Token 가져오기
         String token = jwtUtil.resolveToken(request);
         Claims claims;
@@ -61,7 +61,7 @@ public class BlogService {
                 // 토큰에서 user 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "Token Error"));
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(401, "Token Error"));
             }
 
             // 토큰에서 가져온 user 정보 조회
@@ -72,12 +72,12 @@ public class BlogService {
             }
 
             // 게시글 생성
-            blogRepository.saveAndFlush(new Post(requestDto, optionalUser.get().getId()));
+            Post post = blogRepository.saveAndFlush(new Post(requestDto, optionalUser.get().getId()));
 
-            return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "작성 성공"));
+            return new ApiUtils<>(ApiResultEnum.SUCCESS, new BlogDto.Response(post, optionalUser.get().getUsername()));
         }
 
-        return null;
+        return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(403, "접근 권한 없음"));
     }
 
     @Transactional(readOnly = true)
@@ -85,7 +85,7 @@ public class BlogService {
         Optional<Post> optionalPost = blogRepository.findById(id);
 
         if(optionalPost.isEmpty()) {
-            return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "게시글이 존재하지 않음"));
+            return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(404, "게시글이 존재하지 않음"));
         }
 
         Optional<User> optionalUser = userRepository.findById(optionalPost.get().getUserId());
@@ -98,7 +98,7 @@ public class BlogService {
     }
 
     @Transactional
-    public ApiUtils<ApiMessage> updatePost(Long id, BlogDto.Request requestDto, HttpServletRequest request) {
+    public ApiUtils<?> updatePost(Long id, BlogDto.Request requestDto, HttpServletRequest request) {
         // Request에서 Token 가져오기
         String token = jwtUtil.resolveToken(request);
         Claims claims;
@@ -109,7 +109,7 @@ public class BlogService {
                 // 토큰에서 user 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "Token Error"));
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(401, "Token Error"));
             }
 
             // 토큰에서 가져 온 use 정보 조회
@@ -123,16 +123,16 @@ public class BlogService {
             Optional<Post> optionalPost = blogRepository.findById(id);
 
             if (optionalPost.isEmpty()) {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "존재하지 않는 게시글"));
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(404, "게시글이 존재하지 않음"));
             }
 
             // 게시글 생성
             optionalPost.get().update(requestDto);
 
-            return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "수정 성공"));
+            return new ApiUtils<>(ApiResultEnum.SUCCESS, new BlogDto.Response(optionalPost.get(), optionalUser.get().getUsername()));
         }
 
-        return null;
+        return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(403, "접근 권한 없음"));
     }
 
     @Transactional
@@ -147,7 +147,7 @@ public class BlogService {
                 // 토큰에서 user 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "Token Error"));
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(401, "Token Error"));
             }
 
             // 토큰에서 가져 온 use 정보 조회
@@ -161,7 +161,7 @@ public class BlogService {
             Optional<Post> optionalPost = blogRepository.findById(id);
 
             if (optionalPost.isEmpty()) {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "존재하지 않는 게시글"));
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(404, "게시글이 존재하지 않음"));
             }
 
 
@@ -169,6 +169,6 @@ public class BlogService {
             return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "게시글 삭제"));
         }
 
-        return null;
+        return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(403, "접근 권한 없음"));
     }
 }

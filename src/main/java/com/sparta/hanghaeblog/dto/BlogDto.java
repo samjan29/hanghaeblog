@@ -4,10 +4,14 @@ import com.sparta.hanghaeblog.entity.Post;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import javax.validation.constraints.NotBlank;
+
 public class BlogDto {
     @Getter
     public static class Request {
+        @NotBlank(message = "TITLE: 입력되지 않음")
         private String title;
+        @NotBlank(message = "CONTENTS: 입력되지 않음")
         private String contents;
     }
 

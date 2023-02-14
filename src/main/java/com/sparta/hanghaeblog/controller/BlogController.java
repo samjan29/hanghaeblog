@@ -23,7 +23,7 @@ public class BlogController {
     }
 
     @PostMapping("/post")
-    public ApiUtils<ApiMessage> createPost(@RequestBody BlogDto.Request requestDto, HttpServletRequest request) {
+    public ApiUtils<?> createPost(@RequestBody BlogDto.Request requestDto, HttpServletRequest request) {
         return blogService.createPost(requestDto, request);
     }
 
@@ -33,7 +33,7 @@ public class BlogController {
     }
 
     @PutMapping("/post/{id}")
-    public ApiUtils<ApiMessage> updatePutPost(@PathVariable Long id, @RequestBody BlogDto.Request requestDto, HttpServletRequest request) {
+    public ApiUtils<?> updatePutPost(@PathVariable Long id, @RequestBody BlogDto.Request requestDto, HttpServletRequest request) {
         return blogService.updatePost(id, requestDto, request);
     }
 

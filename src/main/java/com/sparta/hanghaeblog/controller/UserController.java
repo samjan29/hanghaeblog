@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -19,12 +20,12 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/auth/signup")
-    public ApiUtils<ApiMessage> signUp(@RequestBody UserRequestDto RequestDto) {
+    public ApiUtils<ApiMessage> signUp(@RequestBody @Valid UserRequestDto RequestDto) {
         return userService.signUp(RequestDto);
     }
 
     @PostMapping("/auth/login")
-    public ApiUtils<ApiMessage> login(@RequestBody UserRequestDto RequestDto, HttpServletResponse response) {
+    public ApiUtils<ApiMessage> login(@RequestBody @Valid UserRequestDto RequestDto, HttpServletResponse response) {
         return userService.login(RequestDto, response);
     }
 }
