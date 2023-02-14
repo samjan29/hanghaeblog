@@ -1,4 +1,4 @@
-# Spring 입문 과제
+# Spring 과제
 ## 나만의 작은 블로그 서버 만들기
 
 ### Usecase

@@ -1,104 +1,174 @@
 package com.sparta.hanghaeblog.service;
 
+import com.sparta.hanghaeblog.apiFormat.ApiMessage;
+import com.sparta.hanghaeblog.apiFormat.ApiResultEnum;
+import com.sparta.hanghaeblog.apiFormat.ApiUtils;
 import com.sparta.hanghaeblog.dto.BlogDto;
-import com.sparta.hanghaeblog.dto.BlogMessageDto;
-import com.sparta.hanghaeblog.dto.BlogRequestDto;
-import com.sparta.hanghaeblog.dto.BlogResponseDto;
 import com.sparta.hanghaeblog.entity.Post;
+import com.sparta.hanghaeblog.entity.User;
+import com.sparta.hanghaeblog.jwt.JwtUtil;
 import com.sparta.hanghaeblog.repository.BlogRepository;
+import com.sparta.hanghaeblog.repository.UserRepository;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BlogService {
     private final BlogRepository blogRepository;
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public BlogDto<?> getPosts() {
+    public ApiUtils<?> getPosts() {
         List<Post> list = blogRepository.findAllByOrderByCreatedAtDesc();
 
         if (list.size() == 0) {
-            return new BlogDto<>("failure", new BlogMessageDto("작성된 게시글이 없습니다."));
+            return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "작성된 글이 없음"));
         }
 
-        List<BlogResponseDto> responseDtoList = new ArrayList<>();
+        List<BlogDto.Response> responseDtoList = new ArrayList<>();
 
         for (Post post : list) {
-            responseDtoList.add(new BlogResponseDto(post));
+            Optional<User> optionalUser = userRepository.findById(post.getUserId());
+
+            if (optionalUser.isPresent()) {
+                responseDtoList.add(new BlogDto.Response(post, optionalUser.get().getUsername()));
+            } else {
+                responseDtoList.add(new BlogDto.Response(post, "no name"));
+            }
         }
 
-        return new BlogDto<>("success", responseDtoList);
+        return new ApiUtils<>(ApiResultEnum.SUCCESS, responseDtoList);
     }
 
     @Transactional
-    public BlogDto<BlogMessageDto> createPost(BlogRequestDto requestDto) {
-        Post post = new Post(requestDto);
-        blogRepository.save(post);
-        return new BlogDto<>("success", new BlogMessageDto("게시글 작성 성공했습니다."));
+    public ApiUtils<ApiMessage> createPost(BlogDto.Request requestDto, HttpServletRequest request) {
+        // Request에서 Token 가져오기
+        String token = jwtUtil.resolveToken(request);
+        Claims claims;
+
+        // 토큰이 있는 경우에만 게시글 추가 가능
+        if (token != null) {
+            if (jwtUtil.validateToken(token)) {
+                // 토큰에서 user 정보 가져오기
+                claims = jwtUtil.getUserInfoFromToken(token);
+            } else {
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "Token Error"));
+            }
+
+            // 토큰에서 가져온 user 정보 조회
+            Optional<User> optionalUser = userRepository.findByUsername(claims.getSubject());
+
+            if (optionalUser.isEmpty()) {
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "작성자 데이터 없음"));
+            }
+
+            // 게시글 생성
+            blogRepository.saveAndFlush(new Post(requestDto, optionalUser.get().getId()));
+
+            return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "작성 성공"));
+        }
+
+        return null;
     }
 
     @Transactional(readOnly = true)
-    public BlogDto<?> getPost(Long id) {
-        // DTO<T> 만들어서 Exception 핸들링 할 것
-        Post post;
+    public ApiUtils<?> getPost(Long id) {
+        Optional<Post> optionalPost = blogRepository.findById(id);
 
-        try {
-            post = blogRepository.findById(id).orElseThrow(
-                    () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
-            );
-        } catch (IllegalArgumentException exception) {
-            return new BlogDto<>("failure", new BlogMessageDto("게시글이 존재하지 않습니다."));
+        if(optionalPost.isEmpty()) {
+            return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "게시글이 존재하지 않음"));
         }
 
-        return new BlogDto<>("success", new BlogResponseDto(post));
+        Optional<User> optionalUser = userRepository.findById(optionalPost.get().getUserId());
+
+        if (optionalUser.isEmpty()) {
+            return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "작성자 데이터 없음"));
+        }
+
+        return new ApiUtils<>(ApiResultEnum.SUCCESS, new BlogDto.Response(optionalPost.get(), optionalUser.get().getUsername()));
     }
 
     @Transactional
-    public BlogDto<BlogMessageDto> updatePost(Long id, BlogRequestDto requestDto) {
-        // 비밀번호 확인보다 id를 먼저 조회해야 한다 생각해서 위로 올렸다.
-        Post post;
+    public ApiUtils<ApiMessage> updatePost(Long id, BlogDto.Request requestDto, HttpServletRequest request) {
+        // Request에서 Token 가져오기
+        String token = jwtUtil.resolveToken(request);
+        Claims claims;
 
-        try {
-            post = blogRepository.findById(id).orElseThrow(
-                    () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
-            );
-        } catch (IllegalArgumentException exception) {
-            return new BlogDto<>("failure", new BlogMessageDto("게시글이 존재하지 않습니다."));
+        // 토큰이 있는 경우에만 게시글 추가 가능
+        if (token != null) {
+            if (jwtUtil.validateToken(token)) {
+                // 토큰에서 user 정보 가져오기
+                claims = jwtUtil.getUserInfoFromToken(token);
+            } else {
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "Token Error"));
+            }
+
+            // 토큰에서 가져 온 use 정보 조회
+            Optional<User> optionalUser = userRepository.findByUsername(claims.getSubject());
+
+            if (optionalUser.isEmpty()) {
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "작성자 데이터 없음"));
+            }
+
+            // post 정보 조회
+            Optional<Post> optionalPost = blogRepository.findById(id);
+
+            if (optionalPost.isEmpty()) {
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "존재하지 않는 게시글"));
+            }
+
+            // 게시글 생성
+            optionalPost.get().update(requestDto);
+
+            return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "수정 성공"));
         }
 
-        if (!validatePassword(id, requestDto.getPassword())) {
-            return new BlogDto<>("failure", new BlogMessageDto("비밀번호가 틀렸습니다."));
-        }
-
-        post.update(requestDto);
-        return new BlogDto<>("success", new BlogMessageDto("게시글 변경 성공했습니다."));
+        return null;
     }
 
     @Transactional
-    public BlogDto<BlogMessageDto> deletePost(Long id, String password) {
-        // 비밀번호 확인보다 id를 먼저 조회해야 한다 생각해서 위로 올렸다.
-        try {
-            blogRepository.findById(id).orElseThrow(
-                    () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
-            );
-        } catch (IllegalArgumentException exception) {
-            return new BlogDto<>("failure", new BlogMessageDto("게시글이 존재하지 않습니다."));
+    public ApiUtils<ApiMessage> deletePost(Long id, HttpServletRequest request) {
+        // Request에서 Token 가져오기
+        String token = jwtUtil.resolveToken(request);
+        Claims claims;
+
+        // 토큰이 있는 경우에만 게시글 추가 가능
+        if (token != null) {
+            if (jwtUtil.validateToken(token)) {
+                // 토큰에서 user 정보 가져오기
+                claims = jwtUtil.getUserInfoFromToken(token);
+            } else {
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "Token Error"));
+            }
+
+            // 토큰에서 가져 온 use 정보 조회
+            Optional<User> optionalUser = userRepository.findByUsername(claims.getSubject());
+
+            if (optionalUser.isEmpty()) {
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "작성자 데이터 없음"));
+            }
+
+            // post 정보 조회
+            Optional<Post> optionalPost = blogRepository.findById(id);
+
+            if (optionalPost.isEmpty()) {
+                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "존재하지 않는 게시글"));
+            }
+
+
+            blogRepository.deleteById(id);
+            return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "게시글 삭제"));
         }
 
-        if (!validatePassword(id, password)) {
-            return new BlogDto<>("failure", new BlogMessageDto("비밀번호가 틀렸습니다."));
-        }
-
-        blogRepository.deleteById(id);
-        return new BlogDto<>("success", new BlogMessageDto("게시글이 삭제되었습니다."));
-    }
-
-    private Boolean validatePassword(Long id, String password) {
-        return password.equals(blogRepository.getReferenceById(id).getPassword());
+        return null;
     }
 }

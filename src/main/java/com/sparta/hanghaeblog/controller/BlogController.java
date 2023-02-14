@@ -1,47 +1,44 @@
 package com.sparta.hanghaeblog.controller;
 
+import com.sparta.hanghaeblog.apiFormat.ApiMessage;
+import com.sparta.hanghaeblog.apiFormat.ApiUtils;
 import com.sparta.hanghaeblog.dto.BlogDto;
-import com.sparta.hanghaeblog.dto.BlogMessageDto;
-import com.sparta.hanghaeblog.dto.BlogRequestDto;
-import com.sparta.hanghaeblog.dto.BlogResponseDto;
+import com.sparta.hanghaeblog.dto.UserRequestDto;
+import com.sparta.hanghaeblog.entity.User;
 import com.sparta.hanghaeblog.service.BlogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class BlogController {
     private final BlogService blogService;
 
-    @GetMapping("/api/posts")
-    public BlogDto<?> getPosts() {
+    @GetMapping("/posts")
+    public ApiUtils<?> getPosts() {
         return blogService.getPosts();
     }
 
-    @PostMapping("/api/post")
-    public BlogDto<BlogMessageDto> createPost(@RequestBody BlogRequestDto requestDto) {
-        return blogService.createPost(requestDto);
+    @PostMapping("/post")
+    public ApiUtils<ApiMessage> createPost(@RequestBody BlogDto.Request requestDto, HttpServletRequest request) {
+        return blogService.createPost(requestDto, request);
     }
 
-    @GetMapping("/api/post")
-    public BlogDto<?> getPost(@RequestParam Long id) {
+    @GetMapping("/post")
+    public ApiUtils<?> getPost(@RequestParam Long id) {
         return blogService.getPost(id);
     }
 
-    @PutMapping("/api/post/{id}")
-    public BlogDto<BlogMessageDto> updatePutPost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
-        return blogService.updatePost(id, requestDto);
+    @PutMapping("/post/{id}")
+    public ApiUtils<ApiMessage> updatePutPost(@PathVariable Long id, @RequestBody BlogDto.Request requestDto, HttpServletRequest request) {
+        return blogService.updatePost(id, requestDto, request);
     }
 
-//    @PatchMapping("/post/{id}")
-//    public Long updatePatchPost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
-//        return blogService.updatePost(id, requestDto);
-//    }
-
-    @DeleteMapping("/api/post/{id}")
-    public BlogDto<BlogMessageDto> deletePost(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
-        return blogService.deletePost(id, requestDto.getPassword());
+    @DeleteMapping("/post/{id}")
+    public ApiUtils<ApiMessage> deletePost(@PathVariable Long id, HttpServletRequest request) {
+        return blogService.deletePost(id, request);
     }
 }
