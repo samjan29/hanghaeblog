@@ -1,12 +1,11 @@
 package com.sparta.hanghaeblog.dto;
 
 import com.sparta.hanghaeblog.entity.Post;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
 
-public class BlogDto {
+public class PostDto {
     @Getter
     public static class Request {
         @NotBlank(message = "TITLE: 입력되지 않음")

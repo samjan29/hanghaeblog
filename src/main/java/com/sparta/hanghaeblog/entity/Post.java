@@ -1,11 +1,12 @@
 package com.sparta.hanghaeblog.entity;
 
-import com.sparta.hanghaeblog.dto.BlogDto;
-import com.sparta.hanghaeblog.dto.BlogDto.Request;
+import com.sparta.hanghaeblog.dto.PostDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -21,15 +22,20 @@ public class Post extends Timestamped {
     @Column(nullable = false)
     private String contents;
 
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    public Post(BlogDto.Request blogRequestDto, Long userId) {
+    @OneToMany(mappedBy = "post")
+    private List<Comment> commentList = new ArrayList<>();
+
+    public Post(PostDto.Request blogRequestDto, User user) {
         this.title = blogRequestDto.getTitle();
         this.contents = blogRequestDto.getContents();
-        this.userId = userId;
+        this.user = user;
     }
 
-    public void update(BlogDto.Request requestDto) {
+    public void update(PostDto.Request requestDto) {
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();
     }

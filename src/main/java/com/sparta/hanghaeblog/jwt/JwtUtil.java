@@ -1,5 +1,8 @@
 package com.sparta.hanghaeblog.jwt;
 
+import com.sparta.hanghaeblog.apiFormat.ApiMessage;
+import com.sparta.hanghaeblog.apiFormat.ApiResultEnum;
+import com.sparta.hanghaeblog.apiFormat.ApiUtils;
 import com.sparta.hanghaeblog.entity.UserRoleEnum;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -23,7 +26,7 @@ public class JwtUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String AUTHORIZATION_KEY = "auth";
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long TOKEN_TIME = 60 * 60 * 1000L;
+    private static final long TOKEN_TIME = 60 * 60 * 48 * 1000L;
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -81,4 +84,14 @@ public class JwtUtil {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
+    public boolean combo(HttpServletRequest request) {
+        String token = resolveToken(request);
+        validateToken(token);
+
+        if (getUserInfoFromToken(token) != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

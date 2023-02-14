@@ -14,7 +14,7 @@ public class UserRequestDto {
     private String username;
     @NotBlank(message = "PW: 입력되지 않음")
     @Size(min = 8, max = 15, message = "PW: 범위를 벗어남")
-    @Pattern(regexp = "[a-zA-Z\\d]{8,15}", message = "PW: 패턴 틀림")
+    @Pattern(regexp = "[a-zA-Z\\d\\W]{8,15}", message = "PW: 패턴 틀림")
     private String password;
     private boolean admin = false;
     private String adminToken = "";
