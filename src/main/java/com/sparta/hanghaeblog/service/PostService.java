@@ -113,7 +113,7 @@ public class PostService {
                 post.update(requestDto);
 
                 return new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, user.getUsername()));
-            } else if (user.getRole().equals(UserRoleEnum.ADMIN)) {
+            } else if (user.getRole() == UserRoleEnum.ADMIN) {
                 optionalPost.get().update(requestDto);
 
                 return new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, post.getUser().getUsername()));
@@ -152,7 +152,7 @@ public class PostService {
                 postRepository.deleteById(id);
 
                 return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "삭제 성공"));
-            } else if (user.getRole().equals(UserRoleEnum.ADMIN)) {
+            } else if (user.getRole() == UserRoleEnum.ADMIN) {
                 postRepository.deleteById(id);
 
                 return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "삭제 성공"));
