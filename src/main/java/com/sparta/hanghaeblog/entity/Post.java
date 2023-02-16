@@ -26,7 +26,8 @@ public class Post extends Timestamped {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    @OrderBy(value = "createdAt DESC")
     private List<Comment> commentList = new ArrayList<>();
 
     public Post(PostDto.Request blogRequestDto, User user) {

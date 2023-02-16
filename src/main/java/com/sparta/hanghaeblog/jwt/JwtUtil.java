@@ -42,7 +42,7 @@ public class JwtUtil {
     // header 토큰을 가져오기
     public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {    // 유효성 검사 -> null이 아니고 길이가 0이 아니고 공백으로만 이루어져 있지 않고
             return bearerToken.substring(7);
         }
         return null;
@@ -86,9 +86,9 @@ public class JwtUtil {
 
     public boolean combo(HttpServletRequest request) {
         String token = resolveToken(request);
-        validateToken(token);
+        validateToken(token);   // 디코딩 에러 핸들링
 
-        if (getUserInfoFromToken(token) != null) {
+        if (getUserInfoFromToken(token) != null) {  // 디코딩 후 user 정보가 비어있지 않은지 확인
             return true;
         } else {
             return false;

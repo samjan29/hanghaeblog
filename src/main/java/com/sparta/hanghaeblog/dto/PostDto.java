@@ -1,9 +1,12 @@
 package com.sparta.hanghaeblog.dto;
 
+import com.sparta.hanghaeblog.entity.Comment;
 import com.sparta.hanghaeblog.entity.Post;
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PostDto {
     @Getter
@@ -21,6 +24,7 @@ public class PostDto {
         private final String contents;
         private final String username;
         private final String createdAt;
+        private final List<CommentDto.Response> comments;
 
         public Response(Post post, String username) {
             this.id = post.getId();
@@ -28,6 +32,11 @@ public class PostDto {
             this.contents = post.getContents();
             this.username = username;
             this.createdAt = post.getCreatedAt().toString().replace("T", " T").substring(0, 20);
+
+            this.comments = new ArrayList<>();
+            for (Comment comment : post.getCommentList()) {
+                comments.add(new CommentDto.Response(comment));
+            }
         }
     }
 }
