@@ -15,7 +15,8 @@ public enum ErrorCode {
     NO_AUTHORITY(BAD_REQUEST, "작성자만 삭제/수정할 수 있습니다."),
     DUPLICATE_USERNAME(BAD_REQUEST, "중복된 username 입니다."),
     NON_EXISTENT_MEMBER(BAD_REQUEST, "회원을 찾을 수 없습니다."),
-    EMPTY_DATA(BAD_REQUEST, "게시글/댓글이 존재하지 않습니다.");
+    EMPTY_DATA(BAD_REQUEST, "게시글/댓글이 존재하지 않습니다."),
+    WRONG_ADMIN_TOKEN(BAD_REQUEST, "잘못된 관리자 번호입니다.");
 
     private final HttpStatus httpStatus;
     private final String detail;

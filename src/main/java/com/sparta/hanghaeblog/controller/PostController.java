@@ -1,6 +1,5 @@
 package com.sparta.hanghaeblog.controller;
 
-import com.sparta.hanghaeblog.apiFormat.ApiMessage;
 import com.sparta.hanghaeblog.apiFormat.ApiUtils;
 import com.sparta.hanghaeblog.dto.PostDto;
 import com.sparta.hanghaeblog.service.PostService;
