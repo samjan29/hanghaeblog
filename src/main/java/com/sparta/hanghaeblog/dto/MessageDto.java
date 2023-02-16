@@ -1,11 +1,10 @@
-package com.sparta.hanghaeblog.apiFormat;
+package com.sparta.hanghaeblog.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class ApiMessage {
-    private final int statusCode;
+public class MessageDto {
     private final String message;
 }

@@ -1,8 +1,6 @@
 package com.sparta.hanghaeblog.service;
 
-import com.sparta.hanghaeblog.apiFormat.ApiMessage;
-import com.sparta.hanghaeblog.apiFormat.ApiResultEnum;
-import com.sparta.hanghaeblog.apiFormat.ApiUtils;
+import com.sparta.hanghaeblog.dto.MessageDto;
 import com.sparta.hanghaeblog.dto.CommentDto;
 import com.sparta.hanghaeblog.entity.Comment;
 import com.sparta.hanghaeblog.entity.Post;
@@ -22,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -49,7 +46,7 @@ public class CommentService {
 
             Comment comment = commentRepository.save(new Comment(commentRequestDto, post, user));
 
-            return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new CommentDto.Response(comment)));
+            return ResponseEntity.ok(new CommentDto.Response(comment));
         } else {
             return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.INVALID_TOKEN));
         }
@@ -78,7 +75,7 @@ public class CommentService {
             if (comment.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
                 comment.update(commentRequestDto);
 
-                return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new CommentDto.Response(comment)));
+                return ResponseEntity.ok(new CommentDto.Response(comment));
             } else {
                 return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NO_AUTHORITY));
             }
@@ -111,7 +108,7 @@ public class CommentService {
             if (comment.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
                 commentRepository.deleteById(id);
 
-                return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "삭제 성공")));
+                return ResponseEntity.ok(new MessageDto("삭제 성공"));
             } else {
                 return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NO_AUTHORITY));
             }

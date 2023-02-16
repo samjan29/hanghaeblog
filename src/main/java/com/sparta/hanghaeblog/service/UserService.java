@@ -1,8 +1,6 @@
 package com.sparta.hanghaeblog.service;
 
-import com.sparta.hanghaeblog.apiFormat.ApiMessage;
-import com.sparta.hanghaeblog.apiFormat.ApiResultEnum;
-import com.sparta.hanghaeblog.apiFormat.ApiUtils;
+import com.sparta.hanghaeblog.dto.MessageDto;
 import com.sparta.hanghaeblog.dto.UserRequestDto;
 import com.sparta.hanghaeblog.entity.User;
 import com.sparta.hanghaeblog.entity.UserRoleEnum;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,17 +40,14 @@ public class UserService {
 
         userRepository.save(new User(requestDto.getUsername(), requestDto.getPassword(), role));
 
-        return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "가입 성공")));
+        return ResponseEntity.ok(new MessageDto("가입 성공"));
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<?> login(UserRequestDto requestDto, HttpServletResponse response) {    // 이 부분 Response라는 것
-        Optional<User> userOptional = userRepository.findByUsername(requestDto.getUsername());
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "존재하지 않는 ID")));
-        }
-
-        User user = userOptional.get();
+        User user = userRepository.findByUsername(requestDto.getUsername()).orElseThrow(
+                () -> new CustomException(ErrorCode.NON_EXISTENT_MEMBER)
+        );
 
         if (!user.getPassword().equals(requestDto.getPassword())) {
             return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NON_EXISTENT_MEMBER));
@@ -62,6 +56,6 @@ public class UserService {
         // 헤더에 등록
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername(), user.getRole()));
 
-        return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "로그인 성공")));
+        return ResponseEntity.ok(new MessageDto("로그인 성공"));
     }
 }

@@ -1,6 +1,5 @@
 package com.sparta.hanghaeblog.controller;
 
-import com.sparta.hanghaeblog.apiFormat.ApiUtils;
 import com.sparta.hanghaeblog.dto.PostDto;
 import com.sparta.hanghaeblog.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,7 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/posts")
-    public ApiUtils<?> getPosts() {
+    public ResponseEntity<?> getPosts() {
         return postService.getPosts();
     }
 
@@ -26,7 +25,7 @@ public class PostController {
     }
 
     @GetMapping("/post")
-    public ApiUtils<?> getPost(@RequestParam Long id) {
+    public PostDto.Response getPost(@RequestParam Long id) {
         return postService.getPost(id);
     }
 

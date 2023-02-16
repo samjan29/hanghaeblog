@@ -1,8 +1,6 @@
 package com.sparta.hanghaeblog.service;
 
-import com.sparta.hanghaeblog.apiFormat.ApiMessage;
-import com.sparta.hanghaeblog.apiFormat.ApiResultEnum;
-import com.sparta.hanghaeblog.apiFormat.ApiUtils;
+import com.sparta.hanghaeblog.dto.MessageDto;
 import com.sparta.hanghaeblog.dto.PostDto;
 import com.sparta.hanghaeblog.entity.Post;
 import com.sparta.hanghaeblog.entity.User;
@@ -32,11 +30,11 @@ public class PostService {
     private final JwtUtil jwtUtil;
 
     @Transactional(readOnly = true)
-    public ApiUtils<?> getPosts() {
+    public ResponseEntity<?> getPosts() {
         List<Post> list = postRepository.findAllByOrderByCreatedAtDesc();
 
         if (list.size() == 0) {
-            return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "작성된 글이 없음"));
+            return ResponseEntity.ok(new MessageDto("작성된 글이 없음"));
         }
 
         List<PostDto.Response> responseDtoList = new ArrayList<>();
@@ -51,7 +49,7 @@ public class PostService {
             }
         }
 
-        return new ApiUtils<>(ApiResultEnum.SUCCESS, responseDtoList);
+        return ResponseEntity.ok(responseDtoList);
     }
 
     @Transactional
@@ -67,24 +65,24 @@ public class PostService {
             // 게시글 생성
             Post post = postRepository.saveAndFlush(new Post(requestDto, user));
 
-            return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, user.getUsername())));
+            return ResponseEntity.ok(new PostDto.Response(post, user.getUsername()));
         } else {
             return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.INVALID_TOKEN));
         }
     }
 
     @Transactional(readOnly = true)
-    public ApiUtils<?> getPost(Long id) {
+    public PostDto.Response getPost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorCode.EMPTY_DATA)
         );
 
         // 탈퇴 회원
         if (userRepository.findById(post.getUser().getId()).isEmpty()) {
-            return new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, "empty user"));
+            return new PostDto.Response(post, "empty user");
         }
 
-        return new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, post.getUser().getUsername()));
+        return new PostDto.Response(post, post.getUser().getUsername());
     }
 
     @Transactional
@@ -106,7 +104,7 @@ public class PostService {
             if (post.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
                 post.update(requestDto);
 
-                return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, post.getUser().getUsername())));
+                return ResponseEntity.ok(new PostDto.Response(post, post.getUser().getUsername()));
             } else {
                 return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NO_AUTHORITY));
             }
@@ -134,7 +132,7 @@ public class PostService {
             if (post.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
                 postRepository.deleteById(id);
 
-                return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "삭제 성공")));
+                return ResponseEntity.ok(new MessageDto("삭제 성공"));
             } else {
                 return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NO_AUTHORITY));
             }
