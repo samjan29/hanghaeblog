@@ -5,6 +5,7 @@ import com.sparta.hanghaeblog.apiFormat.ApiUtils;
 import com.sparta.hanghaeblog.dto.PostDto;
 import com.sparta.hanghaeblog.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +22,7 @@ public class PostController {
     }
 
     @PostMapping("/post")
-    public ApiUtils<?> createPost(@RequestBody PostDto.Request requestDto, HttpServletRequest request) {
+    public ResponseEntity<?> createPost(@RequestBody PostDto.Request requestDto, HttpServletRequest request) {
         return postService.createPost(requestDto, request);
     }
 
@@ -31,12 +32,12 @@ public class PostController {
     }
 
     @PutMapping("/post/{id}")
-    public ApiUtils<?> updatePutPost(@PathVariable Long id, @RequestBody PostDto.Request requestDto, HttpServletRequest request) {
+    public ResponseEntity<?> updatePutPost(@PathVariable Long id, @RequestBody PostDto.Request requestDto, HttpServletRequest request) {
         return postService.updatePost(id, requestDto, request);
     }
 
     @DeleteMapping("/post/{id}")
-    public ApiUtils<ApiMessage> deletePost(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<?> deletePost(@PathVariable Long id, HttpServletRequest request) {
         return postService.deletePost(id, request);
     }
 }

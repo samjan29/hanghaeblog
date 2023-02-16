@@ -1,11 +1,12 @@
 package com.sparta.hanghaeblog.exception;
 
-public class CustomException extends RuntimeException {
-    // 1. 매개 변수가 없는 기본 생성자
-    CustomException() {}
+import lombok.Getter;
 
-    // 2. 예외 발생 원인(예외 메시지)을 전달하기 위해 String 타입의 매개변수를 갖는 생성자
-    CustomException(String message) {
-        super(message); // RuntimeException 클래스의 생성자를 호출합니다.
+@Getter
+public class CustomException extends RuntimeException {
+    private final ErrorCode errorCode;
+
+    public CustomException(ErrorCode errorCode) {
+        this.errorCode = errorCode;
     }
 }

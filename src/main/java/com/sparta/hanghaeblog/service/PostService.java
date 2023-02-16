@@ -3,16 +3,19 @@ package com.sparta.hanghaeblog.service;
 import com.sparta.hanghaeblog.apiFormat.ApiMessage;
 import com.sparta.hanghaeblog.apiFormat.ApiResultEnum;
 import com.sparta.hanghaeblog.apiFormat.ApiUtils;
-import com.sparta.hanghaeblog.dto.CommentDto;
 import com.sparta.hanghaeblog.dto.PostDto;
 import com.sparta.hanghaeblog.entity.Post;
 import com.sparta.hanghaeblog.entity.User;
 import com.sparta.hanghaeblog.entity.UserRoleEnum;
+import com.sparta.hanghaeblog.exception.CustomException;
+import com.sparta.hanghaeblog.exception.ErrorCode;
+import com.sparta.hanghaeblog.exception.ErrorResponse;
 import com.sparta.hanghaeblog.jwt.JwtUtil;
 import com.sparta.hanghaeblog.repository.PostRepository;
 import com.sparta.hanghaeblog.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,109 +55,92 @@ public class PostService {
     }
 
     @Transactional
-    public ApiUtils<?> createPost(PostDto.Request requestDto, HttpServletRequest request) {
+    public ResponseEntity<?> createPost(PostDto.Request requestDto, HttpServletRequest request) {
         if (jwtUtil.combo(request)) {
             Claims claims = jwtUtil.getUserInfoFromToken(jwtUtil.resolveToken(request));
 
             // 토큰에서 가져온 user 정보 조회
-            Optional<User> userOptional = userRepository.findByUsername(claims.getSubject());
-
-            if (userOptional.isEmpty()) {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "작성자 데이터 없음"));
-            }
+            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+                    () -> new CustomException(ErrorCode.NON_EXISTENT_MEMBER)
+            );
 
             // 게시글 생성
-            Post post = postRepository.saveAndFlush(new Post(requestDto, userOptional.get()));
+            Post post = postRepository.saveAndFlush(new Post(requestDto, user));
 
-            return new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, userOptional.get().getUsername()));
+            return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, user.getUsername())));
         } else {
-            return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(401, "Token Error"));
+            return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.INVALID_TOKEN));
         }
     }
 
     @Transactional(readOnly = true)
     public ApiUtils<?> getPost(Long id) {
-        Optional<Post> postOptional = postRepository.findById(id);
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorCode.EMPTY_DATA)
+        );
 
-        if(postOptional.isEmpty()) {
-            return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(404, "게시글이 존재하지 않음"));
+        // 탈퇴 회원
+        if (userRepository.findById(post.getUser().getId()).isEmpty()) {
+            return new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, "empty user"));
         }
 
-        // 탈퇴한 회원의 글 조회가 가능하게 할 것인지
-        if (userRepository.findById(postOptional.get().getUser().getId()).isEmpty()) {
-            return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "작성자 데이터 없음"));
-        }
-
-        return new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(postOptional.get(), postOptional.get().getUser().getUsername()));
+        return new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, post.getUser().getUsername()));
     }
 
     @Transactional
-    public ApiUtils<?> updatePost(Long id, PostDto.Request requestDto, HttpServletRequest request) {
+    public ResponseEntity<?> updatePost(Long id, PostDto.Request requestDto, HttpServletRequest request) {
         if (jwtUtil.combo(request)) {
             Claims claims = jwtUtil.getUserInfoFromToken(jwtUtil.resolveToken(request));
 
             // 토큰에서 가져 온 use 정보 조회
-            Optional<User> userOptional = userRepository.findByUsername(claims.getSubject());
-
-            if (userOptional.isEmpty()) {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "작성자 데이터 없음"));
-            }
+            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+                    () -> new CustomException(ErrorCode.NON_EXISTENT_MEMBER)
+            );
 
             // post 정보 조회
-            Optional<Post> postOptional = postRepository.findById(id);
+            Post post = postRepository.findById(id).orElseThrow(
+                    () -> new CustomException(ErrorCode.EMPTY_DATA)
+            );
 
-            if (postOptional.isEmpty()) {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(404, "게시글이 존재하지 않음"));
-            }
-
-            Post post = postOptional.get();
-            User user = userOptional.get();
 
             if (post.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
                 post.update(requestDto);
 
-                return new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, post.getUser().getUsername()));
+                return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new PostDto.Response(post, post.getUser().getUsername())));
             } else {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "수정 권한 없음"));
+                return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NO_AUTHORITY));
             }
 
         } else {
-            return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(401, "Token Error"));
+            return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.INVALID_TOKEN));
         }
     }
 
     @Transactional
-    public ApiUtils<ApiMessage> deletePost(Long id, HttpServletRequest request) {
+    public ResponseEntity<?> deletePost(Long id, HttpServletRequest request) {
         if (jwtUtil.combo(request)) {
             Claims claims = jwtUtil.getUserInfoFromToken(jwtUtil.resolveToken(request));
 
             // 토큰에서 가져 온 use 정보 조회
-            Optional<User> userOptional = userRepository.findByUsername(claims.getSubject());
-
-            if (userOptional.isEmpty()) {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "작성자 데이터 없음"));
-            }
+            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+                    () -> new CustomException(ErrorCode.NON_EXISTENT_MEMBER)
+            );
 
             // post 정보 조회
-            Optional<Post> postOptional = postRepository.findById(id);
-
-            if (postOptional.isEmpty()) {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(404, "게시글이 존재하지 않음"));
-            }
-
-            Post post = postOptional.get();
-            User user = userOptional.get();
+            Post post = postRepository.findById(id).orElseThrow(
+                    () -> new CustomException(ErrorCode.EMPTY_DATA)
+            );
 
             if (post.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
                 postRepository.deleteById(id);
 
-                return new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "삭제 성공"));
+                return ResponseEntity.ok(new ApiUtils<>(ApiResultEnum.SUCCESS, new ApiMessage(200, "삭제 성공")));
             } else {
-                return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(500, "삭제 권한 없음"));
+                return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NO_AUTHORITY));
             }
 
         } else {
-            return new ApiUtils<>(ApiResultEnum.FAILURE, new ApiMessage(401, "Token Error"));
+            return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.INVALID_TOKEN));
         }
     }
 }

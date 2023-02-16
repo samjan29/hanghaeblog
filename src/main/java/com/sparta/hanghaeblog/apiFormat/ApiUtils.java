@@ -7,6 +7,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ApiUtils<T> {
     private final ApiResultEnum result;
-
     private final T data;
 }
