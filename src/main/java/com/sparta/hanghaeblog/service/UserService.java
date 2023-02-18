@@ -26,11 +26,13 @@ public class UserService {
 
     @Transactional
     public ResponseEntity<?> signUp(UserRequestDto requestDto) {
-        userRepository.findByUsername(requestDto.getUsername()).orElseThrow(
-                () -> new CustomException(ErrorCode.DUPLICATE_USERNAME)
-        );
+
+        if (userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
+            return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.DUPLICATE_USERNAME));
+        }
 
         UserRoleEnum role = UserRoleEnum.USER;
+
         if (requestDto.isAdmin()) {
             if (!requestDto.getAdminToken().equals(ADMIN_TOKEN)) {
                 return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.WRONG_ADMIN_TOKEN));

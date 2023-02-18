@@ -72,7 +72,7 @@ public class CommentService {
             );
 
             // 댓글을 쓴 유저와 동일한지
-            if (comment.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
+            if (comment.getUser().getUsername().equals(user.getUsername())) {
                 comment.update(commentRequestDto);
 
                 return ResponseEntity.ok(new CommentDto.Response(comment));
@@ -105,7 +105,7 @@ public class CommentService {
             );
 
             // 댓글을 쓴 유저와 동일한지
-            if (comment.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
+            if (comment.getUser().getUsername().equals(user.getUsername())) {
                 commentRepository.deleteById(id);
 
                 return ResponseEntity.ok(new MessageDto("삭제 성공"));
