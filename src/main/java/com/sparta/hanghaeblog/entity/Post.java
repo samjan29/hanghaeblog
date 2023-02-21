@@ -23,7 +23,7 @@ public class Post extends Timestamped {
     private String contents;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id")   // name 알아서 정해 줌 Entity_PK
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)

@@ -1,11 +1,10 @@
 package com.sparta.hanghaeblog.service;
 
-import com.sparta.hanghaeblog.dto.MessageDto;
+import com.sparta.hanghaeblog.dto.SuccessResponseDto;
 import com.sparta.hanghaeblog.dto.CommentDto;
 import com.sparta.hanghaeblog.entity.Comment;
 import com.sparta.hanghaeblog.entity.Post;
 import com.sparta.hanghaeblog.entity.User;
-import com.sparta.hanghaeblog.entity.UserRoleEnum;
 import com.sparta.hanghaeblog.exception.CustomException;
 import com.sparta.hanghaeblog.exception.ErrorCode;
 import com.sparta.hanghaeblog.exception.ErrorResponse;
@@ -108,7 +107,7 @@ public class CommentService {
             if (comment.getUser().getUsername().equals(user.getUsername())) {
                 commentRepository.deleteById(id);
 
-                return ResponseEntity.ok(new MessageDto("삭제 성공"));
+                return ResponseEntity.ok(new SuccessResponseDto(200, "댓글 삭제 성공"));
             } else {
                 return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NO_AUTHORITY));
             }

@@ -1,12 +1,14 @@
 package com.sparta.hanghaeblog.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Getter
+@NoArgsConstructor
 public class UserRequestDto {
     @NotBlank(message = "ID: 입력되지 않음")
     @Size(min = 4, max = 10, message = "ID: 범위를 벗어남")

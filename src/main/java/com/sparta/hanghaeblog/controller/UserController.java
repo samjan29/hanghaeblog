@@ -13,18 +13,18 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/auth/signup")
-    public ResponseEntity<?> signUp(@RequestBody @Valid UserRequestDto RequestDto) {
-        return userService.signUp(RequestDto);
+    @PostMapping("/signup")
+    public ResponseEntity<?> signUp(@RequestBody @Valid UserRequestDto userRequestDto) {
+        return userService.signUp(userRequestDto);
     }
 
-    @PostMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestBody @Valid UserRequestDto RequestDto, HttpServletResponse response) {
-        return userService.login(RequestDto, response);
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid UserRequestDto userRequestDto, HttpServletResponse response) {
+        return userService.login(userRequestDto, response);
     }
 }
