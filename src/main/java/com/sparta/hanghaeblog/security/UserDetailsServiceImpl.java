@@ -1,14 +1,12 @@
 package com.sparta.hanghaeblog.security;
 
-import com.sparta.hanghaeblog.entity.User;
-import com.sparta.hanghaeblog.repository.UserRepository;
+import com.sparta.hanghaeblog.user.entity.User;
+import com.sparta.hanghaeblog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

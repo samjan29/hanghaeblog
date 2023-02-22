@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 
-@Component
+//@Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     private static final SecurityExceptionDto exceptionDto = new SecurityExceptionDto(ErrorCode.PERMISSION_DINED.getHttpStatus().value(), ErrorCode.PERMISSION_DINED.getDetail());
 

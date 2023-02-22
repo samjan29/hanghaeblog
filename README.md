@@ -8,4 +8,4 @@
 ![Blog API 명세서](/etc/blogAPI.png)
 
 ### ERD
-![Blog ERD](/etc/blogERD.png)
+https://www.erdcloud.com/d/RefAtgw3PG6yALkZ2
