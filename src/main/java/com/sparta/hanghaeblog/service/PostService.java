@@ -105,7 +105,7 @@ public class PostService {
                 () -> new CustomException(ErrorCode.EMPTY_DATA)
         );
 
-        if (post.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
+        if (post.getUser().getUsername().equals(user.getUsername())) {
             post.update(requestDto);
 
             ArrayList<CommentDto.Response> comments = new ArrayList<>();
@@ -120,6 +120,29 @@ public class PostService {
     }
 
     @Transactional
+    public ResponseEntity<?> updatePostAdmin(Long id, PostDto.Request requestDto, User user) {
+        // 토큰에서 가져 온 use 정보 조회
+        userRepository.findByUsername(user.getUsername()).orElseThrow(
+                () -> new CustomException(ErrorCode.NON_EXISTENT_MEMBER)
+        );
+
+        // post 정보 조회
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorCode.EMPTY_DATA)
+        );
+
+        post.update(requestDto);
+
+        ArrayList<CommentDto.Response> comments = new ArrayList<>();
+        for (Comment comment : post.getCommentList()) {
+            comments.add(new CommentDto.Response(comment));
+        }
+
+        return ResponseEntity.ok(new PostDto.Response(post, post.getUser().getUsername(), comments));
+
+    }
+
+    @Transactional
     public ResponseEntity<?> deletePost(Long id, User user) {
         // 토큰에서 가져 온 use 정보 조회
         userRepository.findByUsername(user.getUsername()).orElseThrow(
@@ -131,12 +154,29 @@ public class PostService {
                 () -> new CustomException(ErrorCode.EMPTY_DATA)
         );
 
-        if (post.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
+        if (post.getUser().getUsername().equals(user.getUsername())) {
             postRepository.deleteById(id);
 
             return ResponseEntity.ok(new SuccessResponseDto<>("게시글 삭제 성공"));
         } else {
             return ErrorResponse.toResponseEntity(ErrorCode.NO_AUTHORITY);
         }
+    }
+
+    @Transactional
+    public ResponseEntity<?> deletePostAdmin(Long id, User user) {
+        // 토큰에서 가져 온 use 정보 조회
+        userRepository.findByUsername(user.getUsername()).orElseThrow(
+                () -> new CustomException(ErrorCode.NON_EXISTENT_MEMBER)
+        );
+
+        // post 정보 조회
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorCode.EMPTY_DATA)
+        );
+
+        postRepository.deleteById(id);
+
+        return ResponseEntity.ok(new SuccessResponseDto<>("게시글 삭제 성공"));
     }
 }
