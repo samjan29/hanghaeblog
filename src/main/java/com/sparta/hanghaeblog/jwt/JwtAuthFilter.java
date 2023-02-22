@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -36,20 +37,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
             Claims info = jwtUtil.getUserInfoFromToken(token);
             setAuthentication(info.getSubject());
-//        } else if (request.getRequestURI().contains("/api/auth") || !request.getMethod().equals("GET")) {    // 이렇게 하지 않으면 JWT에서는 회원가입도 못하고 조회도 안됨
-//            // return 빼고 throw를 해야 할 듯
-//            return;
-//        } else if (!request.getMethod().equals("GET")) {
-//            jwtExceptionHandler(response, ErrorCode.NULL_TOKEN);
-//            return;
         }
         filterChain.doFilter(request, response);
     }
 
     public void setAuthentication(String username) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
+
         Authentication authentication = jwtUtil.createAuthentication(username);
         context.setAuthentication(authentication);
+
 
         SecurityContextHolder.setContext(context);
     }

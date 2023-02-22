@@ -1,14 +1,15 @@
 package com.sparta.hanghaeblog.service;
 
+import com.sparta.hanghaeblog.dto.CommentDto;
 import com.sparta.hanghaeblog.dto.SuccessResponseDto;
 import com.sparta.hanghaeblog.dto.PostDto;
+import com.sparta.hanghaeblog.entity.Comment;
 import com.sparta.hanghaeblog.entity.Post;
 import com.sparta.hanghaeblog.entity.User;
 import com.sparta.hanghaeblog.entity.UserRoleEnum;
 import com.sparta.hanghaeblog.exception.CustomException;
 import com.sparta.hanghaeblog.exception.ErrorCode;
 import com.sparta.hanghaeblog.exception.ErrorResponse;
-import com.sparta.hanghaeblog.jwt.JwtUtil;
 import com.sparta.hanghaeblog.repository.PostRepository;
 import com.sparta.hanghaeblog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,14 +26,13 @@ import java.util.Optional;
 public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
 
     @Transactional(readOnly = true)
     public ResponseEntity<?> getPosts() {
         List<Post> list = postRepository.findAllByOrderByCreatedAtDesc();
 
         if (list.size() == 0) {
-            return ResponseEntity.ok(new SuccessResponseDto<>(200, "아직 작성된 글이 없습니다."));
+            return ResponseEntity.ok(new SuccessResponseDto<>("아직 작성된 글이 없습니다."));
         }
 
         List<PostDto.Response> responseDtoList = new ArrayList<>();
@@ -40,71 +40,82 @@ public class PostService {
         for (Post post : list) {
             Optional<User> userOptional = userRepository.findById(post.getUser().getId());
 
+            ArrayList<CommentDto.Response> comments = new ArrayList<>();
+            for (Comment comment : post.getCommentList()) {
+                comments.add(new CommentDto.Response(comment));
+            }
+
             if (userOptional.isPresent()) {
-                responseDtoList.add(new PostDto.Response(post, userOptional.get().getUsername()));
+                responseDtoList.add(new PostDto.Response(post, userOptional.get().getUsername(), comments));
             } else {
-                responseDtoList.add(new PostDto.Response(post, "empty user")); // 탈퇴 회원의 글인 경우
+                responseDtoList.add(new PostDto.Response(post, "empty user", comments)); // 탈퇴 회원의 글인 경우
             }
         }
 
-        return ResponseEntity.ok(new SuccessResponseDto<>(200, responseDtoList));
+        return ResponseEntity.ok(new SuccessResponseDto<>(responseDtoList));
     }
 
     @Transactional
     public ResponseEntity<?> createPost(PostDto.Request requestDto, User user) {
         // 토큰에서 가져온 user 정보 조회
-        Optional<User> userOptional = userRepository.findByUsername(user.getUsername());
-        if (userOptional.isEmpty()) {
-            return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NON_EXISTENT_MEMBER));
-        }
+        userRepository.findByUsername(user.getUsername()).orElseThrow(
+                () -> new CustomException(ErrorCode.NON_EXISTENT_MEMBER)
+        );
 
         // 게시글 생성
         Post post = postRepository.save(new Post(requestDto, user));
 
-        return ResponseEntity.ok(new SuccessResponseDto<>(200, new PostDto.Response(post, user.getUsername())));
+        ArrayList<CommentDto.Response> comments = new ArrayList<>();
+        for (Comment comment : post.getCommentList()) {
+            comments.add(new CommentDto.Response(comment));
+        }
+
+        return ResponseEntity.ok(new SuccessResponseDto<>(new PostDto.Response(post, user.getUsername(), comments)));
 
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<?> getPost(Long id) {
-        Optional<Post> postOptional = postRepository.findById(id);
-        if (postOptional.isEmpty()) {
-            return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.EMPTY_DATA));
-        }
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorCode.EMPTY_DATA)
+        );
 
-        Post post = postOptional.get();
+        ArrayList<CommentDto.Response> comments = new ArrayList<>();
+        for (Comment comment : post.getCommentList()) {
+            comments.add(new CommentDto.Response(comment));
+        }
 
         // 탈퇴 회원
         if (userRepository.findById(post.getUser().getId()).isEmpty()) {
-            return ResponseEntity.ok(new SuccessResponseDto<>(200, new PostDto.Response(post, "empty user")));
+            return ResponseEntity.ok(new SuccessResponseDto<>(new PostDto.Response(post, "empty user", comments)));
         }
 
-        return ResponseEntity.ok(new SuccessResponseDto<>(200, new PostDto.Response(post, post.getUser().getUsername())));
+        return ResponseEntity.ok(new SuccessResponseDto<>(new PostDto.Response(post, post.getUser().getUsername(), comments)));
     }
 
     @Transactional
     public ResponseEntity<?> updatePost(Long id, PostDto.Request requestDto, User user) {
         // 토큰에서 가져 온 use 정보 조회
-        Optional<User> userOptional = userRepository.findByUsername(user.getUsername());
-        if (userOptional.isEmpty()) {
-            return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NON_EXISTENT_MEMBER));
-        }
+        userRepository.findByUsername(user.getUsername()).orElseThrow(
+                () -> new CustomException(ErrorCode.NON_EXISTENT_MEMBER)
+        );
 
         // post 정보 조회
-        Optional<Post> postOptional = postRepository.findById(id);
-        if (postOptional.isEmpty()) {
-            return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.EMPTY_DATA));
-        }
-
-        Post post = postOptional.get();
-
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorCode.EMPTY_DATA)
+        );
 
         if (post.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
             post.update(requestDto);
 
-            return ResponseEntity.ok(new PostDto.Response(post, post.getUser().getUsername()));
+            ArrayList<CommentDto.Response> comments = new ArrayList<>();
+            for (Comment comment : post.getCommentList()) {
+                comments.add(new CommentDto.Response(comment));
+            }
+
+            return ResponseEntity.ok(new PostDto.Response(post, post.getUser().getUsername(), comments));
         } else {
-            return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NO_AUTHORITY));
+            return ErrorResponse.toResponseEntity(ErrorCode.NO_AUTHORITY);
         }
     }
 
@@ -123,9 +134,9 @@ public class PostService {
         if (post.getUser().getUsername().equals(user.getUsername()) || user.getRole() == UserRoleEnum.ADMIN) {
             postRepository.deleteById(id);
 
-            return ResponseEntity.ok(new SuccessResponseDto<>(200, "게시글 삭제 성공"));
+            return ResponseEntity.ok(new SuccessResponseDto<>("게시글 삭제 성공"));
         } else {
-            return ErrorResponse.toResponseEntity(new CustomException(ErrorCode.NO_AUTHORITY));
+            return ErrorResponse.toResponseEntity(ErrorCode.NO_AUTHORITY);
         }
     }
 }

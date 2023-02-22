@@ -10,12 +10,12 @@ public class ErrorResponse {
     private final int status;
     private final String message;
 
-    public static ResponseEntity<ErrorResponse> toResponseEntity(CustomException exception) {
+    public static ResponseEntity<ErrorResponse> toResponseEntity(ErrorCode errorCode) {
         return ResponseEntity
-                .status(exception.getErrorCode().getHttpStatus())
+                .status(errorCode.getHttpStatus())
                 .body(ErrorResponse.builder()
-                        .status(exception.getErrorCode().getHttpStatus().value())
-                        .message(exception.getErrorCode().getDetail())
+                        .status(errorCode.getHttpStatus().value())
+                        .message(errorCode.getDetail())
                         .build());
     }
 }

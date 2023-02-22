@@ -27,7 +27,7 @@ public class JwtUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String AUTHORIZATION_KEY = "auth";
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long TOKEN_TIME = 60 * 60 * 48 * 1000L;
+    private static final long TOKEN_TIME = 60 * 60 * 1000L;
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -58,8 +58,8 @@ public class JwtUtil {
                 Jwts.builder()
                         .setSubject(username)
                         .claim(AUTHORIZATION_KEY, role)
-                        .setExpiration(new Date(date.getTime() + TOKEN_TIME))
-                        .setIssuedAt(date)
+//                        .setExpiration(new Date(date.getTime() + TOKEN_TIME))
+//                        .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)
                         .compact();
     }
@@ -86,16 +86,16 @@ public class JwtUtil {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
-    public boolean combo(HttpServletRequest request) {
-        String token = resolveToken(request);
-        validateToken(token);   // 디코딩 에러 핸들링
-
-        if (getUserInfoFromToken(token) != null) {  // 디코딩 후 user 정보가 비어있지 않은지 확인
-            return true;
-        } else {
-            return false;
-        }
-    }
+//    public boolean combo(HttpServletRequest request) {
+//        String token = resolveToken(request);
+//        validateToken(token);   // 디코딩 에러 핸들링
+//
+//        if (getUserInfoFromToken(token) != null) {  // 디코딩 후 user 정보가 비어있지 않은지 확인
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
 
     // 인증 객체 생성
     public Authentication createAuthentication(String username) {
