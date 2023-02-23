@@ -1,7 +1,7 @@
 package com.sparta.hanghaeblog.security;
 
-import com.sparta.hanghaeblog.user.entity.User;
-import com.sparta.hanghaeblog.user.repository.UserRepository;
+import com.sparta.hanghaeblog.domain.user.entity.User;
+import com.sparta.hanghaeblog.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

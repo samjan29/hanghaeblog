@@ -1,7 +1,7 @@
 package com.sparta.hanghaeblog.security;
 
-import com.sparta.hanghaeblog.user.entity.User;
-import com.sparta.hanghaeblog.user.entity.UserRoleEnum;
+import com.sparta.hanghaeblog.domain.user.entity.User;
+import com.sparta.hanghaeblog.domain.user.entity.UserRoleEnum;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
