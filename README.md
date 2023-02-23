@@ -5,7 +5,7 @@
 ![Blog Usecase](/etc/blogUsecase.png)
 
 ### API 명세서
-![Blog API 명세서](/etc/blogAPI.png)
+https://documenter.getpostman.com/view/25357152/2s93CNMD8Z
 
 ### ERD
 https://www.erdcloud.com/d/RefAtgw3PG6yALkZ2

@@ -36,7 +36,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity
                 .status(BAD_REQUEST)
-                .body(errors);
+                .body(errors.put("status", BAD_REQUEST.toString()));
     }
 
     @ExceptionHandler(value = {CustomException.class})
