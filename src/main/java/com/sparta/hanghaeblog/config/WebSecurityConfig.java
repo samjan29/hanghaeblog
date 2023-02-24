@@ -35,7 +35,6 @@ public class WebSecurityConfig {
         // h2-console 사용 및 resources 접근 허용 설정
         return (web) -> web.ignoring()
 //                .requestMatchers(PathRequest.toH2Console())
-//                .requestMatchers(My)
 //                // 정적 자원에 대해서는 Security 설정을 적용하지 않음
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }

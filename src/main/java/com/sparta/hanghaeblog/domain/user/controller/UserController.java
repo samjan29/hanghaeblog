@@ -22,6 +22,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
+    @CrossOrigin(origins = "http://localhost:3000", exposedHeaders = "Authorization")
     public ResponseEntity<SuccessResponseDto<String>> login(@RequestBody @Valid UserRequestDto userRequestDto, HttpServletResponse response) {
         return userService.login(userRequestDto, response);
     }
